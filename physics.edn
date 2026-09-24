@@ -1,0 +1,33 @@
+;; What this vertical's robot physically does, declared for
+;; kotoba.robotics.process (kotoba-lang/robotics). `kbb -M:physics` runs it.
+;;
+;; README "Robotics premise": a document-handling robot performs client-record
+;; scanning, filing and compliance-checklist walkthroughs for professional
+;; services managers (ISCO 1349). Its physical work is moving client files:
+;; lifting archive boxes from a cart onto the scanner's feed table, and
+;; pushing a loaded records trolley from the file room to the scanning station.
+;;
+;; Every number without a cited source is marked `estimate` in its :basis.
+;; Replacing an estimate with a sourced value is this bot's growth work.
+{:physics/schema "itonami.physical-ai.spec.v1"
+ :repo "cloud-itonami/cloud-itonami-isco-1349"
+ :cases
+ [{:id :archive-box-to-scanner
+   :kind :manipulator
+   :procedure "arm lifts an archive box of client files from the trolley deck onto the scanner feed table"
+   :params {:l1-m 0.50 :l2-m 0.45 :m1-kg 4.0 :m2-kg 3.0
+            :from [0.60 -0.10] :to [0.35 0.45] :duration-s 3.0 :steps 500}
+   :sweep {:param :payload-kg :values [1.0 2.5 4.0 6.0 8.0]}
+   :quantity :peak-tau1-nm
+   :limit {:max 80.0 :basis "estimate: continuous shoulder torque of a mid-size collaborative arm (~7 kg payload class)"}
+   :boundary {:lo 0.1 :hi 30.0}}
+  {:id :records-trolley-run
+   :kind :transport
+   :procedure "robot pushes a tall trolley of client files from the file room to the scanning station and stops at the door"
+   :params {:mass-kg 70.0 :payload-kg 60.0 :distance-m 40.0 :v-max-mps 0.8 :a-max-mps2 0.4
+            :brake-decel-mps2 1.5 :drive-force-n 150.0 :crr 0.02
+            :support-half-length-m 0.30}
+   :sweep {:param :cog-height-m :values [0.4 0.6 0.8 1.0 1.2]}
+   :quantity :min-tipover-margin
+   :limit {:min 0.3 :basis "estimate: keep 30 % of the static tip-over moment in reserve on a hard stop, for floor bumps and door thresholds"}
+   :boundary {:lo 0.3 :hi 2.5}}]}
